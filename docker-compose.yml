@@ -1,0 +1,37 @@
+version: '3.3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./finexo-html:/usr/share/nginx/html
+      - ./certs/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt
+      - ./certs/nginx-selfsigned.key:/etc/ssl/private/nginx-selfsigned.key
+    networks:
+      - webnet
+  redis:
+    image: redis:alpine
+    networks:
+      - webnet
+
+  php:
+    image: php:7.4-fpm
+    volumes:
+      - ./php-src:/var/www/html
+    networks:
+      - webnet
+
+  dotnet:
+    image: mcr.microsoft.com/dotnet/core/sdk:3.1
+    volumes:
+      - ./dotnetapp:/app
+    working_dir: /app
+    command: ["dotnet", "run"]
+    networks:
+      - webnet
+
+networks:
+  webnet:
